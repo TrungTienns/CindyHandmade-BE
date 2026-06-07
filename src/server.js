@@ -1,0 +1,61 @@
+const express = require('express');
+const dotenv = require('dotenv');
+
+// Load env vars
+dotenv.config();
+
+const cors = require('cors');
+const { connectDB, sequelize } = require('./config/db');
+
+// Load models
+require('./models/User');
+require('./models/Product');
+require('./models/Order');
+require('./models/OrderItem');
+require('./models/Cart');
+require('./models/CartItem');
+
+// Connect to database and sync models
+connectDB().then(() => {
+    sequelize.sync({ alter: true }).then(() => {
+        console.log('Database synced');
+    });
+});
+
+const app = express();
+
+// Body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// Enable CORS
+app.use(cors());
+
+// Mặc định route để test trên trình duyệt
+app.get('/', (req, res) => {
+    res.send('API is running...');
+});
+
+const { swaggerUi, specs } = require('./config/swagger');
+
+// Routes
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/cart', require('./routes/cartRoutes'));
+
+// Error handling middleware (basic)
+app.use((err, req, res, next) => {
+    const statusCode = res.statusCode ? res.statusCode : 500;
+    res.status(statusCode);
+    res.json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
+});
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
