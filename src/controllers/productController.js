@@ -1,12 +1,19 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 
 // @desc    Get products
 // @route   GET /api/products
-// @access  Private
+// @access  Public
 const getProducts = async (req, res) => {
     try {
-        // Lấy toàn bộ danh sách sản phẩm
-        const products = await Product.findAll();
+        // Lấy toàn bộ danh sách sản phẩm kèm theo Category
+        const products = await Product.findAll({
+            include: [{
+                model: Category,
+                as: 'category',
+                attributes: ['id', 'name']
+            }]
+        });
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -18,7 +25,13 @@ const getProducts = async (req, res) => {
 // @access  Public
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findByPk(req.params.id);
+        const product = await Product.findByPk(req.params.id, {
+            include: [{
+                model: Category,
+                as: 'category',
+                attributes: ['id', 'name']
+            }]
+        });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -33,18 +46,35 @@ const getProductById = async (req, res) => {
 // @access  Private
 const setProduct = async (req, res) => {
     try {
-        const { name, description, price, imageUrl } = req.body;
+        const { name, description, price, categoryId, stock } = req.body;
+        let imageUrl = req.body.imageUrl;
 
         if (!name || !description || price === undefined) {
             return res.status(400).json({ message: 'Please add all product fields' });
+        }
+
+        if (req.file) {
+            imageUrl = req.file.path;
+        }
+
+        let translations = {};
+        if (req.body.translations) {
+            try {
+                translations = JSON.parse(req.body.translations);
+            } catch (e) {
+                console.error("Failed to parse translations", e);
+            }
         }
 
         const product = await Product.create({
             name,
             description,
             price,
-            imageUrl, // Thêm dòng này để lưu link ảnh
+            imageUrl, 
+            categoryId,
+            stock: stock || 0,
             userId: req.user.id,
+            translations,
         });
 
         res.status(201).json(product);
@@ -74,7 +104,20 @@ const updateProduct = async (req, res) => {
             return res.status(401).json({ message: 'User not authorized' });
         }
 
-        const updatedProduct = await product.update(req.body);
+        const updateData = { ...req.body };
+        if (updateData.translations && typeof updateData.translations === 'string') {
+            try {
+                updateData.translations = JSON.parse(updateData.translations);
+            } catch (e) {
+                console.error("Failed to parse translations", e);
+            }
+        }
+
+        if (req.file) {
+            updateData.imageUrl = req.file.path;
+        }
+
+        const updatedProduct = await product.update(updateData);
 
         res.status(200).json(updatedProduct);
     } catch (error) {

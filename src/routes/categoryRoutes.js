@@ -1,34 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const {
-    getProducts,
-    getProductById,
-    setProduct,
-    updateProduct,
-    deleteProduct,
-} = require('../controllers/productController');
-const { protect } = require('../middleware/authMiddleware');
-const uploadCloud = require('../config/cloudinary');
+    getCategories,
+    getCategoryById,
+    createCategory,
+    updateCategory,
+    deleteCategory
+} = require('../controllers/categoryController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
  * tags:
- *   name: Products
- *   description: Quản lý sản phẩm người dùng
+ *   name: Categories
+ *   description: Quản lý danh mục sản phẩm
  */
 
 /**
  * @swagger
- * /api/products:
+ * /api/categories:
  *   get:
- *     summary: Lấy danh sách sản phẩm
- *     tags: [Products]
+ *     summary: Lấy danh sách toàn bộ danh mục
+ *     tags: [Categories]
  *     responses:
  *       200:
- *         description: Lấy danh sách thành công
+ *         description: Lấy thành công
  *   post:
- *     summary: Tạo sản phẩm mới
- *     tags: [Products]
+ *     summary: Tạo danh mục mới (Cần quyền Admin)
+ *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -39,46 +38,37 @@ const uploadCloud = require('../config/cloudinary');
  *             type: object
  *             required:
  *               - name
- *               - description
- *               - price
  *             properties:
  *               name:
  *                 type: string
  *               description:
  *                 type: string
- *               price:
- *                 type: number
- *               imageUrl:
- *                 type: string
  *     responses:
  *       201:
- *         description: Tạo sản phẩm thành công
+ *         description: Tạo thành công
  *       401:
- *         description: Bị từ chối (Chưa đăng nhập)
+ *         description: Bị từ chối
  */
-router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), setProduct);
+router.route('/').get(getCategories).post(protect, admin, createCategory);
 
 /**
  * @swagger
- * /api/products/{id}:
+ * /api/categories/{id}:
  *   get:
- *     summary: Lấy chi tiết một sản phẩm
- *     tags: [Products]
+ *     summary: Lấy chi tiết 1 danh mục
+ *     tags: [Categories]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID của sản phẩm
  *     responses:
  *       200:
- *         description: Thành công
- *       404:
- *         description: Không tìm thấy sản phẩm
+ *         description: Lấy thành công
  *   put:
- *     summary: Cập nhật sản phẩm
- *     tags: [Products]
+ *     summary: Cập nhật danh mục (Cần quyền Admin)
+ *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -98,16 +88,12 @@ router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), se
  *                 type: string
  *               description:
  *                 type: string
- *               price:
- *                 type: number
- *               imageUrl:
- *                 type: string
  *     responses:
  *       200:
  *         description: Cập nhật thành công
  *   delete:
- *     summary: Xóa sản phẩm
- *     tags: [Products]
+ *     summary: Xóa danh mục (Cần quyền Admin)
+ *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -120,6 +106,6 @@ router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), se
  *       200:
  *         description: Xóa thành công
  */
-router.route('/:id').get(getProductById).put(protect, uploadCloud.single('image'), updateProduct).delete(protect, deleteProduct);
+router.route('/:id').get(getCategoryById).put(protect, admin, updateCategory).delete(protect, admin, deleteCategory);
 
 module.exports = router;

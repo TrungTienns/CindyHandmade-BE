@@ -17,6 +17,13 @@ const CartItem = sequelize.define('CartItem', {
             min: 1
         }
     }
+}, {
+    indexes: [
+        {
+            unique: true,
+            fields: ['cartId', 'productId']
+        }
+    ]
 });
 
 // A CartItem belongs to a Cart

@@ -9,6 +9,7 @@ const { connectDB, sequelize } = require('./config/db');
 
 // Load models
 require('./models/User');
+require('./models/Category');
 require('./models/Product');
 require('./models/Order');
 require('./models/OrderItem');
@@ -41,8 +42,11 @@ const { swaggerUi, specs } = require('./config/swagger');
 // Routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 // Error handling middleware (basic)
 app.use((err, req, res, next) => {
