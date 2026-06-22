@@ -27,6 +27,7 @@ connectDB().then(() => {
 });
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Render, Vercel, etc.) for rate limiting to work correctly
 
 // Enable CORS (must be before routes and helmet)
 const allowedOrigins = [
