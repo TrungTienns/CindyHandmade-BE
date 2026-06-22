@@ -32,13 +32,13 @@ const getCategoryById = async (req, res) => {
 // @access  Private (Admin only)
 const createCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, nameFr } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Please provide category name' });
         }
 
-        const category = await Category.create({ name, description });
+        const category = await Category.create({ name, description, nameFr });
         res.status(201).json(category);
     } catch (error) {
         res.status(500).json({ message: error.message });

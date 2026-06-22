@@ -18,6 +18,10 @@ const Category = sequelize.define('Category', {
     description: {
         type: DataTypes.TEXT,
         allowNull: true,
+    },
+    nameFr: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 });
 

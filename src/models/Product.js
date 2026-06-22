@@ -39,10 +39,10 @@ const Product = sequelize.define('Product', {
             min: { args: [0], msg: 'Stock cannot be negative' }
         }
     },
-    imageUrl: {
-        type: DataTypes.STRING,
+    images: {
+        type: DataTypes.JSON,
         allowNull: true,
-        defaultValue: 'https://via.placeholder.com/500', // Ảnh mặc định nếu không có
+        defaultValue: []
     },
     translations: {
         type: DataTypes.JSON,

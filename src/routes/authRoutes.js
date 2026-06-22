@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, getMe } = require('../controllers/authController');
+const { registerUser, loginUser, getMe, logoutUser } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const { registerValidator, loginValidator } = require('../validators/authValidator');
 
@@ -88,6 +88,7 @@ router.post('/login', loginValidator, loginUser);
  *       404:
  *         description: Không tìm thấy người dùng
  */
+router.post('/logout', logoutUser);
 router.get('/me', protect, getMe);
 
 module.exports = router;

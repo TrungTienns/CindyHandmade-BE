@@ -1,13 +1,23 @@
 const authService = require('../services/authService');
 
+const setTokenCookie = (res, token) => {
+    res.cookie('jwt', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict', // Prevent CSRF attacks
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+};
+
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
     try {
-        // Validation is already handled by authValidator middleware
         const result = await authService.registerUser(req.body);
-        res.status(201).json(result);
+        const { token, ...userData } = result;
+        setTokenCookie(res, token);
+        res.status(201).json(userData);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -20,10 +30,23 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
         const result = await authService.loginUser(email, password);
-        res.status(200).json(result);
+        const { token, ...userData } = result;
+        setTokenCookie(res, token);
+        res.status(200).json(userData);
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
+};
+
+// @desc    Logout user / clear cookie
+// @route   POST /api/auth/logout
+// @access  Public
+const logoutUser = (req, res) => {
+    res.cookie('jwt', '', {
+        httpOnly: true,
+        expires: new Date(0),
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
 };
 
 // @desc    Get current user profile
@@ -42,5 +65,6 @@ const getMe = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
+    logoutUser,
     getMe,
 };

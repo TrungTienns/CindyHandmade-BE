@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const cors = require('cors');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
 const { connectDB, sequelize } = require('./config/db');
 
 // Load models
@@ -18,19 +21,39 @@ require('./models/CartItem');
 
 // Connect to database and sync models
 connectDB().then(() => {
-    sequelize.sync({ alter: true }).then(() => {
+    sequelize.sync().then(() => {
         console.log('Database synced');
     });
 });
 
 const app = express();
 
+// Enable CORS (must be before routes and helmet)
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Add frontend origins
+    credentials: true
+}));
+
 // Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Enable CORS
-app.use(cors());
+// Cookie parser middleware
+app.use(cookieParser());
+
+// Security middleware
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use('/api', limiter);
 
 // Mặc định route để test trên trình duyệt
 app.get('/', (req, res) => {
@@ -47,6 +70,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
 
 // Error handling middleware (basic)
 app.use((err, req, res, next) => {

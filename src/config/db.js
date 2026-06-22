@@ -27,7 +27,7 @@ const connectDB = async (retries = 10, delayMs = 15000) => {
             console.log(`Retrying database connection in ${delayMs / 1000}s... (${retries} attempts left)`);
             setTimeout(() => connectDB(retries - 1, delayMs), delayMs);
         } else {
-            console.error('Exhausted all retries connecting to the database. The server will keep running without a DB connection; restart the service after fixing the issue.');
+            console.error('Exhausted all retries connecting to the database.');
         }
     }
 };

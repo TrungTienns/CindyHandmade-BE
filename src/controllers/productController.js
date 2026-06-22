@@ -47,14 +47,17 @@ const getProductById = async (req, res) => {
 const setProduct = async (req, res) => {
     try {
         const { name, description, price, categoryId, stock } = req.body;
-        let imageUrl = req.body.imageUrl;
+        let images = req.body.images ? JSON.parse(req.body.images) : [];
 
         if (!name || !description || price === undefined) {
             return res.status(400).json({ message: 'Please add all product fields' });
         }
 
-        if (req.file) {
-            imageUrl = req.file.path;
+        if (req.files && req.files.length > 0) {
+            const uploadedImages = req.files.map(file => file.path);
+            images = [...images, ...uploadedImages];
+        } else if (images.length === 0) {
+            images = ['https://via.placeholder.com/500'];
         }
 
         let translations = {};
@@ -70,7 +73,7 @@ const setProduct = async (req, res) => {
             name,
             description,
             price,
-            imageUrl, 
+            images,
             categoryId,
             stock: stock || 0,
             userId: req.user.id,
@@ -99,8 +102,8 @@ const updateProduct = async (req, res) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        // Make sure the logged in user matches the product user
-        if (product.userId !== req.user.id) {
+        // Make sure the logged in user matches the product user or is an admin
+        if (product.userId !== req.user.id && req.user.role !== 'admin') {
             return res.status(401).json({ message: 'User not authorized' });
         }
 
@@ -113,8 +116,11 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        if (req.file) {
-            updateData.imageUrl = req.file.path;
+        if (req.files && req.files.length > 0) {
+            const uploadedImages = req.files.map(file => file.path);
+            updateData.images = uploadedImages; // Replace old images with newly uploaded ones
+        } else if (req.body.images) {
+            updateData.images = JSON.parse(req.body.images);
         }
 
         const updatedProduct = await product.update(updateData);
@@ -141,8 +147,8 @@ const deleteProduct = async (req, res) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        // Make sure the logged in user matches the product user
-        if (product.userId !== req.user.id) {
+        // Make sure the logged in user matches the product user or is an admin
+        if (product.userId !== req.user.id && req.user.role !== 'admin') {
             return res.status(401).json({ message: 'User not authorized' });
         }
 

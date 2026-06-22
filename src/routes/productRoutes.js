@@ -48,15 +48,13 @@ const uploadCloud = require('../config/cloudinary');
  *                 type: string
  *               price:
  *                 type: number
- *               imageUrl:
- *                 type: string
  *     responses:
  *       201:
  *         description: Tạo sản phẩm thành công
  *       401:
  *         description: Bị từ chối (Chưa đăng nhập)
  */
-router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), setProduct);
+router.route('/').get(getProducts).post(protect, uploadCloud.array('images', 5), setProduct);
 
 /**
  * @swagger
@@ -100,8 +98,6 @@ router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), se
  *                 type: string
  *               price:
  *                 type: number
- *               imageUrl:
- *                 type: string
  *     responses:
  *       200:
  *         description: Cập nhật thành công
@@ -120,6 +116,6 @@ router.route('/').get(getProducts).post(protect, uploadCloud.single('image'), se
  *       200:
  *         description: Xóa thành công
  */
-router.route('/:id').get(getProductById).put(protect, uploadCloud.single('image'), updateProduct).delete(protect, deleteProduct);
+router.route('/:id').get(getProductById).put(protect, uploadCloud.array('images', 5), updateProduct).delete(protect, deleteProduct);
 
 module.exports = router;
