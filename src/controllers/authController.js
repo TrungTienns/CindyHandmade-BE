@@ -3,8 +3,8 @@ const authService = require('../services/authService');
 const setTokenCookie = (res, token) => {
     res.cookie('jwt', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict', // Prevent CSRF attacks
+        secure: true, // Must be true for sameSite: 'none'
+        sameSite: 'none', // Allow cross-site cookies (Vercel -> Render)
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 };
