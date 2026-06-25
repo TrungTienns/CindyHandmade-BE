@@ -58,7 +58,8 @@ const checkout = async (userId, checkoutData) => {
                 orderId: order.id,
                 productId: item.productId,
                 quantity: item.quantity,
-                priceAtPurchase: item.product.price
+                priceAtPurchase: item.product.price,
+                size: item.size
             }, { transaction });
 
             // Deduct Stock

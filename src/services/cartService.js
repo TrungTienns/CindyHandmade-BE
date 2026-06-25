@@ -21,7 +21,7 @@ const getCart = async (userId) => {
     return cart;
 };
 
-const addToCart = async (userId, productId, quantity = 1) => {
+const addToCart = async (userId, productId, quantity = 1, size = null) => {
     let cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
         cart = await Cart.create({ userId });
@@ -29,7 +29,7 @@ const addToCart = async (userId, productId, quantity = 1) => {
 
     // Check if item already exists
     let cartItem = await CartItem.findOne({
-        where: { cartId: cart.id, productId }
+        where: { cartId: cart.id, productId, size }
     });
 
     if (cartItem) {
@@ -41,19 +41,20 @@ const addToCart = async (userId, productId, quantity = 1) => {
         cartItem = await CartItem.create({
             cartId: cart.id,
             productId,
-            quantity
+            quantity,
+            size
         });
     }
 
     return getCart(userId);
 };
 
-const updateCartItem = async (userId, productId, quantity) => {
+const updateCartItem = async (userId, productId, quantity, size = null) => {
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) throw new Error('Cart not found');
 
     const cartItem = await CartItem.findOne({
-        where: { cartId: cart.id, productId }
+        where: { cartId: cart.id, productId, size }
     });
 
     if (!cartItem) throw new Error('Item not found in cart');
@@ -68,12 +69,18 @@ const updateCartItem = async (userId, productId, quantity) => {
     return getCart(userId);
 };
 
-const removeCartItem = async (userId, productId) => {
+const removeCartItem = async (userId, productId, size = null) => {
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) throw new Error('Cart not found');
 
+    // Mệnh đề where cần bao gồm size để xóa chính xác
+    const whereClause = { cartId: cart.id, productId };
+    if (size !== undefined) {
+        whereClause.size = size;
+    }
+
     await CartItem.destroy({
-        where: { cartId: cart.id, productId }
+        where: whereClause
     });
 
     return getCart(userId);

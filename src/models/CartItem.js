@@ -16,12 +16,16 @@ const CartItem = sequelize.define('CartItem', {
         validate: {
             min: 1
         }
+    },
+    size: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 }, {
     indexes: [
         {
             unique: true,
-            fields: ['cartId', 'productId']
+            fields: ['cartId', 'productId', 'size']
         }
     ]
 });

@@ -48,6 +48,7 @@ const setProduct = async (req, res) => {
     try {
         const { name, description, price, categoryId, stock } = req.body;
         let images = req.body.images ? JSON.parse(req.body.images) : [];
+        let sizes = req.body.sizes ? req.body.sizes.split(',').map(s => s.trim()).filter(s => s) : [];
 
         if (!name || !description || price === undefined) {
             return res.status(400).json({ message: 'Please add all product fields' });
@@ -74,6 +75,7 @@ const setProduct = async (req, res) => {
             description,
             price,
             images,
+            sizes,
             categoryId,
             stock: stock || 0,
             userId: req.user.id,
@@ -114,6 +116,10 @@ const updateProduct = async (req, res) => {
             } catch (e) {
                 console.error("Failed to parse translations", e);
             }
+        }
+
+        if (updateData.sizes && typeof updateData.sizes === 'string') {
+            updateData.sizes = updateData.sizes.split(',').map(s => s.trim()).filter(s => s);
         }
 
         if (req.files && req.files.length > 0) {

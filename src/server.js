@@ -21,7 +21,7 @@ require('./models/CartItem');
 
 // Connect to database and sync models
 connectDB().then(() => {
-    sequelize.sync({ alter: true }).then(() => {
+    sequelize.sync().then(() => {
         console.log('Database synced');
     });
 });

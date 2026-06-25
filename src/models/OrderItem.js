@@ -18,6 +18,10 @@ const OrderItem = sequelize.define('OrderItem', {
         type: DataTypes.FLOAT,
         allowNull: false,
         comment: 'Lưu lại giá của sản phẩm tại thời điểm mua hàng'
+    },
+    size: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 });
 

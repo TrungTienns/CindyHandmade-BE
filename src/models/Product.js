@@ -44,6 +44,11 @@ const Product = sequelize.define('Product', {
         allowNull: true,
         defaultValue: []
     },
+    sizes: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: []
+    },
     translations: {
         type: DataTypes.JSON,
         allowNull: true,
