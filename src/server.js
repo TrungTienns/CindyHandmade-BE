@@ -21,7 +21,7 @@ require('./models/CartItem');
 
 // Connect to database and sync models
 connectDB().then(() => {
-    sequelize.sync().then(() => {
+    sequelize.sync({ alter: true }).then(() => {
         console.log('Database synced');
     });
 });
@@ -39,7 +39,7 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));

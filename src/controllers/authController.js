@@ -15,9 +15,8 @@ const setTokenCookie = (res, token) => {
 const registerUser = async (req, res) => {
     try {
         const result = await authService.registerUser(req.body);
-        const { token, ...userData } = result;
-        setTokenCookie(res, token);
-        res.status(201).json(userData);
+        setTokenCookie(res, result.token);
+        res.status(201).json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -30,9 +29,8 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
         const result = await authService.loginUser(email, password);
-        const { token, ...userData } = result;
-        setTokenCookie(res, token);
-        res.status(200).json(userData);
+        setTokenCookie(res, result.token);
+        res.status(200).json(result);
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
