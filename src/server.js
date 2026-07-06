@@ -18,6 +18,7 @@ require('./models/Order');
 require('./models/OrderItem');
 require('./models/Cart');
 require('./models/CartItem');
+require('./models/Wishlist');
 
 // Connect to database and sync models
 connectDB().then(() => {
@@ -49,8 +50,8 @@ app.use(cors({
 }));
 
 // Body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: false }));
 
 // Cookie parser middleware
 app.use(cookieParser());
@@ -85,6 +86,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 
 // Error handling middleware (basic)
 app.use((err, req, res, next) => {

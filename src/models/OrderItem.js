@@ -22,6 +22,10 @@ const OrderItem = sequelize.define('OrderItem', {
     size: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    color: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 });
 

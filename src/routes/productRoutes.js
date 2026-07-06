@@ -54,7 +54,7 @@ const uploadCloud = require('../config/cloudinary');
  *       401:
  *         description: Bị từ chối (Chưa đăng nhập)
  */
-router.route('/').get(getProducts).post(protect, uploadCloud.array('images', 5), setProduct);
+router.route('/').get(getProducts).post(protect, uploadCloud.array('images', 50), setProduct);
 
 /**
  * @swagger
@@ -116,6 +116,6 @@ router.route('/').get(getProducts).post(protect, uploadCloud.array('images', 5),
  *       200:
  *         description: Xóa thành công
  */
-router.route('/:id').get(getProductById).put(protect, uploadCloud.array('images', 5), updateProduct).delete(protect, deleteProduct);
+router.route('/:id').get(getProductById).put(protect, uploadCloud.array('images', 50), updateProduct).delete(protect, deleteProduct);
 
 module.exports = router;

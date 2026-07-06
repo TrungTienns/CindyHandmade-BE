@@ -21,7 +21,7 @@ const getCart = async (userId) => {
     return cart;
 };
 
-const addToCart = async (userId, productId, quantity = 1, size = null) => {
+const addToCart = async (userId, productId, quantity = 1, size = null, color = null) => {
     let cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
         cart = await Cart.create({ userId });
@@ -29,7 +29,7 @@ const addToCart = async (userId, productId, quantity = 1, size = null) => {
 
     // Check if item already exists
     let cartItem = await CartItem.findOne({
-        where: { cartId: cart.id, productId, size }
+        where: { cartId: cart.id, productId, size, color }
     });
 
     if (cartItem) {
@@ -42,19 +42,20 @@ const addToCart = async (userId, productId, quantity = 1, size = null) => {
             cartId: cart.id,
             productId,
             quantity,
-            size
+            size,
+            color
         });
     }
 
     return getCart(userId);
 };
 
-const updateCartItem = async (userId, productId, quantity, size = null) => {
+const updateCartItem = async (userId, productId, quantity, size = null, color = null) => {
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) throw new Error('Cart not found');
 
     const cartItem = await CartItem.findOne({
-        where: { cartId: cart.id, productId, size }
+        where: { cartId: cart.id, productId, size, color }
     });
 
     if (!cartItem) throw new Error('Item not found in cart');
@@ -69,14 +70,17 @@ const updateCartItem = async (userId, productId, quantity, size = null) => {
     return getCart(userId);
 };
 
-const removeCartItem = async (userId, productId, size = null) => {
+const removeCartItem = async (userId, productId, size = null, color = null) => {
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) throw new Error('Cart not found');
 
-    // Mệnh đề where cần bao gồm size để xóa chính xác
+    // Mệnh đề where cần bao gồm size và color để xóa chính xác
     const whereClause = { cartId: cart.id, productId };
     if (size !== undefined) {
         whereClause.size = size;
+    }
+    if (color !== undefined) {
+        whereClause.color = color;
     }
 
     await CartItem.destroy({
