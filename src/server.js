@@ -21,9 +21,15 @@ require('./models/CartItem');
 require('./models/Wishlist');
 
 // Connect to database and sync models
-connectDB().then(() => {
-    sequelize.sync().then(() => {
-        console.log('Database synced');
+connectDB().then(async () => {
+    try {
+        await sequelize.query("ALTER TABLE `CartItems` ADD COLUMN `color` VARCHAR(255) NULL;");
+    } catch (e) {
+        // Ignore error if column already exists
+    }
+    
+    sequelize.sync({ alter: true }).then(() => {
+        console.log('Models synchronized');
     });
 });
 
