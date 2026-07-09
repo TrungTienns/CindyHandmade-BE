@@ -90,7 +90,7 @@ app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 
 // Error handling middleware (basic)
 app.use((err, req, res, next) => {
-    const statusCode = res.statusCode ? res.statusCode : 500;
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode);
     res.json({
         message: err.message,

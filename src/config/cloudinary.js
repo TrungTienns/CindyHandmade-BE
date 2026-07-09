@@ -16,7 +16,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'KnitWorkshop', // Tên thư mục trên Cloudinary để chứa ảnh
-    allowedFormats: ['jpeg', 'png', 'jpg'], // Chỉ cho phép định dạng này
+    allowedFormats: ['jpeg', 'png', 'jpg', 'webp', 'heic'], // Chỉ cho phép định dạng này
   }
 });
 
