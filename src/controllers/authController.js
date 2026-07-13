@@ -60,9 +60,26 @@ const getMe = async (req, res) => {
     }
 };
 
+// @desc    Update current user profile
+// @route   PUT /api/auth/me
+// @access  Private
+const updateMe = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required' });
+        }
+        const updatedProfile = await authService.updateProfile(req.user.id, name);
+        res.status(200).json(updatedProfile);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
     getMe,
+    updateMe,
 };

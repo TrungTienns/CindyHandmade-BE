@@ -64,8 +64,26 @@ const getProfile = async (userId) => {
     return user;
 };
 
+const updateProfile = async (userId, newName) => {
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    
+    user.name = newName;
+    await user.save();
+    
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    };
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getProfile,
+    updateProfile,
 };
