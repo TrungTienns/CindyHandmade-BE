@@ -124,10 +124,17 @@ const updateProduct = async (req, res) => {
 
         if (req.files && req.files.length > 0) {
             const uploadedImages = req.files.map(file => file.path);
-            updateData.images = uploadedImages; // Replace old images with newly uploaded ones
+            // Merge ảnh cũ muốn giữ lại + ảnh mới vừa upload
+            let keptImages = [];
+            if (req.body.images) {
+                try { keptImages = JSON.parse(req.body.images); } catch (e) { keptImages = []; }
+            }
+            updateData.images = [...keptImages, ...uploadedImages];
         } else if (req.body.images) {
-            updateData.images = JSON.parse(req.body.images);
+            // Không có ảnh mới, chỉ giữ lại ảnh cũ đã chọn
+            try { updateData.images = JSON.parse(req.body.images); } catch (e) {}
         }
+        // Nếu cả hai đều không có → không thay đổi images (giữ nguyên trong DB)
 
         const updatedProduct = await product.update(updateData);
 
