@@ -1,20 +1,46 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const Review = require('../models/Review');
+const { sequelize } = require('../config/db');
+const { fn, col, literal } = require('sequelize');
 
 // @desc    Get products
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
     try {
-        // Lấy toàn bộ danh sách sản phẩm kèm theo Category
         const products = await Product.findAll({
             include: [{
                 model: Category,
                 as: 'category',
-                attributes: ['id', 'name']
-            }]
+                attributes: ['id', 'name'],
+            }],
+            attributes: {
+                include: [
+                    [fn('AVG', col('Reviews.rating')), 'avgRating'],
+                    [fn('COUNT', col('Reviews.id')), 'reviewCount'],
+                ],
+            },
+            include: [
+                { model: Category, as: 'category', attributes: ['id', 'name'] },
+                { model: Review, as: 'Reviews', attributes: [] }, // For aggregation only
+            ],
+            group: ['Product.id', 'category.id'],
+            subQuery: false,
         });
-        res.status(200).json(products);
+        // Convert avgRating to number if it's a string, and reviewCount to number
+        const formattedProducts = products.map(p => {
+            const json = p.toJSON();
+            if (json.avgRating) {
+                json.avgRating = parseFloat(json.avgRating);
+                json.avgRating = Math.round(json.avgRating * 10) / 10;
+            }
+            if (json.reviewCount !== undefined) {
+                json.reviewCount = parseInt(json.reviewCount, 10);
+            }
+            return json;
+        });
+        res.status(200).json(formattedProducts);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -26,16 +52,32 @@ const getProducts = async (req, res) => {
 const getProductById = async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id, {
-            include: [{
-                model: Category,
-                as: 'category',
-                attributes: ['id', 'name']
-            }]
+            include: [
+                { model: Category, as: 'category', attributes: ['id', 'name'] },
+                {
+                    model: Review,
+                    as: 'Reviews',
+                    include: [{ model: require('./User'), as: 'user', attributes: ['id', 'name', 'avtImgurl'] }],
+                    order: [['createdAt', 'DESC']],
+                },
+            ],
         });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        res.status(200).json(product);
+
+        // Compute avgRating and reviewCount from included Reviews
+        const reviews = product.Reviews || [];
+        const reviewCount = reviews.length;
+        const avgRating = reviewCount > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+            : null;
+
+        const result = product.toJSON();
+        result.avgRating = avgRating ? Math.round(avgRating * 10) / 10 : null;
+        result.reviewCount = reviewCount;
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

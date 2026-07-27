@@ -19,6 +19,7 @@ require('./models/OrderItem');
 require('./models/Cart');
 require('./models/CartItem');
 require('./models/Wishlist');
+require('./models/Review');
 
 // Connect to database and sync models
 connectDB().then(async () => {
@@ -93,6 +94,7 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 
 // Error handling middleware (basic)
 app.use((err, req, res, next) => {

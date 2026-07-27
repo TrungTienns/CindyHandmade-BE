@@ -118,4 +118,8 @@ router.route('/').get(getProducts).post(protect, uploadCloud.array('images', 50)
  */
 router.route('/:id').get(getProductById).put(protect, uploadCloud.array('images', 50), updateProduct).delete(protect, deleteProduct);
 
+// Nested reviews: /api/products/:id/reviews
+const reviewRoutes = require('./reviewRoutes');
+router.use('/:id/reviews', reviewRoutes);
+
 module.exports = router;

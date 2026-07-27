@@ -53,6 +53,9 @@ const loginUser = async (email, password) => {
 };
 
 const getProfile = async (userId) => {
+    const Order = require('../models/Order');
+    const Review = require('../models/Review');
+
     const user = await User.findByPk(userId, {
         attributes: ['id', 'name', 'email', 'role'] // Exclude password
     });
@@ -61,10 +64,25 @@ const getProfile = async (userId) => {
         throw new Error('User not found');
     }
 
-    return user;
+    const totalOrders = await Order.count({ where: { userId } });
+    const totalReviews = await Review.count({ where: { userId } });
+    const totalPoints = totalOrders * 10; // 10 điểm mỗi đơn hàng
+
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        totalOrders,
+        totalReviews,
+        totalPoints,
+    };
 };
 
 const updateProfile = async (userId, newName) => {
+    const Order = require('../models/Order');
+    const Review = require('../models/Review');
+
     const user = await User.findByPk(userId);
     if (!user) {
         throw new Error('User not found');
@@ -72,12 +90,19 @@ const updateProfile = async (userId, newName) => {
     
     user.name = newName;
     await user.save();
+
+    const totalOrders = await Order.count({ where: { userId } });
+    const totalReviews = await Review.count({ where: { userId } });
+    const totalPoints = totalOrders * 10;
     
     return {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        totalOrders,
+        totalReviews,
+        totalPoints,
     };
 };
 
