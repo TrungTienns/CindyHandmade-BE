@@ -153,7 +153,50 @@ const getOrderById = async (orderId) => {
     });
 };
 
+
+const cancelOrder = async (userId, orderId) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const order = await Order.findOne({
+            where: { id: orderId, userId },
+            include: [{
+                model: OrderItem,
+                as: 'items',
+                include: [{ model: Product, as: 'product' }]
+            }],
+            transaction
+        });
+
+        if (!order) {
+            throw new Error('Order not found or you do not have permission.');
+        }
+
+        if (order.status !== 'pending') {
+            throw new Error('Chỉ có thể hủy đơn hàng ở trạng thái chờ xử lý (pending).');
+        }
+
+        // Change status
+        order.status = 'cancelled';
+        await order.save({ transaction });
+
+        // Restore stock
+        for (const item of order.items) {
+            if (item.product) {
+                item.product.stock += item.quantity;
+                await item.product.save({ transaction });
+            }
+        }
+
+        await transaction.commit();
+        return order;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
 module.exports = {
+    cancelOrder,
     checkout,
     getMyOrders,
     getAllOrders,

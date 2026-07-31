@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { checkout, getMyOrders, getAllOrders, getOrderById, updateOrderStatus, updatePaymentStatus } = require('../controllers/orderController');
+const { checkout, getMyOrders, getAllOrders, getOrderById, updateOrderStatus, updatePaymentStatus, cancelOrder } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 /**
@@ -164,5 +164,28 @@ router.put('/:id/status', protect, admin, updateOrderStatus);
  *         description: Cập nhật thành công
  */
 router.put('/:id/payment-status', protect, admin, updatePaymentStatus);
+
+
+/**
+ * @swagger
+ * /api/orders/{id}/cancel:
+ *   put:
+ *     summary: Hủy đơn hàng (User)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Hủy đơn hàng thành công
+ *       400:
+ *         description: Không thể hủy đơn hàng này
+ */
+router.put('/:id/cancel', protect, cancelOrder);
 
 module.exports = router;

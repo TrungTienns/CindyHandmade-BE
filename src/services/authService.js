@@ -55,6 +55,7 @@ const loginUser = async (email, password) => {
 const getProfile = async (userId) => {
     const Order = require('../models/Order');
     const Review = require('../models/Review');
+    const OrderItem = require('../models/OrderItem');
 
     const user = await User.findByPk(userId, {
         attributes: ['id', 'name', 'email', 'role'] // Exclude password
@@ -65,8 +66,58 @@ const getProfile = async (userId) => {
     }
 
     const totalOrders = await Order.count({ where: { userId } });
-    const totalReviews = await Review.count({ where: { userId } });
-    const totalPoints = totalOrders * 10; // 10 điểm mỗi đơn hàng
+    const userReviews = await Review.findAll({ where: { userId } });
+    const totalReviews = userReviews.length;
+    
+    // Tính điểm: 10 điểm cho mỗi sản phẩm trong đơn hàng delivered, 20 điểm cho mỗi review
+    const deliveredOrders = await Order.findAll({
+        where: { userId, status: 'delivered' },
+        include: [{ model: OrderItem, as: 'items' }]
+    });
+    
+    let totalProductsDelivered = 0;
+    let pointsHistory = [];
+
+    deliveredOrders.forEach(order => {
+        if (order.items && order.items.length > 0) {
+            let itemsCount = 0;
+            order.items.forEach(item => {
+                itemsCount += item.quantity;
+            });
+            totalProductsDelivered += itemsCount;
+            
+            pointsHistory.push({
+                id: `order_${order.id}`,
+                icon: 'cart.fill',
+                title: `Order #${order.id}`,
+                points: itemsCount * 10,
+                date: order.updatedAt,
+                isEarned: true
+            });
+        }
+    });
+
+    userReviews.forEach(review => {
+        pointsHistory.push({
+            id: `review_${review.id}`,
+            icon: 'star.fill',
+            title: `Product Review`,
+            points: 20,
+            date: review.createdAt,
+            isEarned: true
+        });
+    });
+
+    // Sort history by date descending
+    pointsHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Format date for response
+    pointsHistory = pointsHistory.map(entry => ({
+        ...entry,
+        date: new Date(entry.date).toLocaleDateString('vi-VN')
+    }));
+
+    const totalPoints = (totalProductsDelivered * 10) + (totalReviews * 20);
 
     return {
         id: user.id,
@@ -76,13 +127,11 @@ const getProfile = async (userId) => {
         totalOrders,
         totalReviews,
         totalPoints,
+        pointsHistory,
     };
 };
 
 const updateProfile = async (userId, newName) => {
-    const Order = require('../models/Order');
-    const Review = require('../models/Review');
-
     const user = await User.findByPk(userId);
     if (!user) {
         throw new Error('User not found');
@@ -91,19 +140,7 @@ const updateProfile = async (userId, newName) => {
     user.name = newName;
     await user.save();
 
-    const totalOrders = await Order.count({ where: { userId } });
-    const totalReviews = await Review.count({ where: { userId } });
-    const totalPoints = totalOrders * 10;
-    
-    return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        totalOrders,
-        totalReviews,
-        totalPoints,
-    };
+    return await getProfile(userId);
 };
 
 module.exports = {

@@ -29,7 +29,7 @@ connectDB().then(async () => {
         // Ignore error if column already exists
     }
     
-    sequelize.sync({ alter: true }).then(() => {
+    sequelize.sync().then(() => {
         console.log('Models synchronized');
     });
 });

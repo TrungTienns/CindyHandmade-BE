@@ -102,7 +102,21 @@ const getOrderById = async (req, res) => {
     }
 };
 
+
+// @desc    Cancel order (User)
+// @route   PUT /api/orders/:id/cancel
+// @access  Private
+const cancelOrder = async (req, res) => {
+    try {
+        const order = await orderService.cancelOrder(req.user.id, req.params.id);
+        res.status(200).json({ message: 'Hủy đơn hàng thành công', order });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 module.exports = {
+    cancelOrder,
     checkout,
     getMyOrders,
     getAllOrders,

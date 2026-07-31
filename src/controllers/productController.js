@@ -57,7 +57,7 @@ const getProductById = async (req, res) => {
                 {
                     model: Review,
                     as: 'Reviews',
-                    include: [{ model: require('./User'), as: 'user', attributes: ['id', 'name', 'avtImgurl'] }],
+                include: [{ model: require('../models/User'), as: 'user', attributes: ['id', 'name'] }],
                     order: [['createdAt', 'DESC']],
                 },
             ],
