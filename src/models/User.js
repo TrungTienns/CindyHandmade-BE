@@ -34,6 +34,16 @@ const User = sequelize.define('User', {
         validate: {
             notEmpty: { msg: 'Please add a password' }
         }
+    },
+    resetPasswordOtp: {
+        type: DataTypes.STRING(6),
+        allowNull: true,
+        defaultValue: null,
+    },
+    resetPasswordExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
     }
 }, {
     hooks: {
